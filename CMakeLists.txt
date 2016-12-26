@@ -43,7 +43,7 @@ if(NOT BOOST_SOURCE OR NOT EXISTS "${BOOST_SOURCE}")
          LOG download_log
          SHOW_PROGRESS
     )
-    if(download_status)
+    if(download_status[0])
       message(FATAL_ERROR "Download failed. Status: ${download_status}\nLog: ${download_log}")
     endif()
     file(RENAME "${DOWNLOAD_PATH}.tmp" "${DOWNLOAD_PATH}")
@@ -103,59 +103,32 @@ function(_add_boost_lib)
   set(multiValueArgs SOURCES LINK DEFINE DEFINE_PRIVATE)
   cmake_parse_arguments(BOOSTLIB "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN})
-  add_library(Boost_${BOOSTLIB_NAME} STATIC ${BOOSTLIB_SOURCES})
-  add_library(Boost::${BOOSTLIB_NAME} ALIAS Boost_${BOOSTLIB_NAME})
+  add_library(boost_${BOOSTLIB_NAME} STATIC ${BOOSTLIB_SOURCES})
+  add_library(Boost::${BOOSTLIB_NAME} ALIAS boost_${BOOSTLIB_NAME})
   if(NOT BOOST_STANDALONE)
-    set_target_properties(Boost_${BOOSTLIB_NAME} PROPERTIES EXCLUDE_FROM_ALL 1)
+    set_target_properties(boost_${BOOSTLIB_NAME} PROPERTIES EXCLUDE_FROM_ALL 1)
   endif()
-  target_link_libraries(Boost_${BOOSTLIB_NAME} PUBLIC Boost::boost)
+  target_link_libraries(boost_${BOOSTLIB_NAME} PUBLIC Boost::boost)
   if(MSVC)
-    target_compile_options(Boost_${BOOSTLIB_NAME} PRIVATE /w)
+    target_compile_options(boost_${BOOSTLIB_NAME} PRIVATE /w)
   else()
-    target_compile_options(Boost_${BOOSTLIB_NAME} PRIVATE -w)
+    target_compile_options(boost_${BOOSTLIB_NAME} PRIVATE -w)
   endif()
   if(BOOSTLIB_LINK)
-    target_link_libraries(Boost_${BOOSTLIB_NAME} PUBLIC ${BOOSTLIB_LINK})
+    target_link_libraries(boost_${BOOSTLIB_NAME} PUBLIC ${BOOSTLIB_LINK})
   endif()
   if(BOOSTLIB_DEFINE)
-    target_compile_definitions(Boost_${BOOSTLIB_NAME} PUBLIC ${BOOSTLIB_DEFINE})
+    target_compile_definitions(boost_${BOOSTLIB_NAME} PUBLIC ${BOOSTLIB_DEFINE})
   endif()
   if(BOOSTLIB_DEFINE_PRIVATE)
-    target_compile_definitions(Boost_${BOOSTLIB_NAME} PRIVATE ${BOOSTLIB_DEFINE_PRIVATE})
+    target_compile_definitions(boost_${BOOSTLIB_NAME} PRIVATE ${BOOSTLIB_DEFINE_PRIVATE})
   endif()
 endfunction()
 
 set(BOOST_LIBS
-  atomic
   chrono
-  container
-  context
-  coroutine
-  coroutine2
-  date_time
-  exception
-  fiber
   filesystem
-  graph
-  graph_parallel
-  iostreams
-  locale
-  log
-  math
-  metaparse
-  mpi
-  program_options
-  python
-  random
-  regex
-  serialization
-  signals
   system
-  test
-  thread
-  timer
-  type_erasure
-  wave
 )
 
 foreach(lib ${BOOST_LIBS})
